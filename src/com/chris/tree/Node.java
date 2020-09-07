@@ -1,33 +1,47 @@
 package com.chris.tree;
 
 public class Node {
-    private int value;
+  private int value;
 
-    private Node left;
+  private Node parent;
 
-    private Node right;
+  private Node left;
 
-    public boolean isleaf(){
-        return this.left == null && this.right == null;
-    }
+  private Node right;
 
-    public int getValue() {
-        return value;
-    }
+  public Node getParent() {
+    return Parent;
+  }
 
-    public Node getLeft() {
-        return left;
-    }
+  public void setParent(Node parent) {
+    Parent = parent;
+  }
 
-    public void setLeft(Node left) {
-        this.left = left;
-    }
+  public Node(int val){
+    this.value = val;
+  }
 
-    public Node getRight() {
-        return right;
-    }
+  public boolean isLeaf() {
+    return this.left == null && this.right == null;
+  }
 
-    public void setRight(Node right) {
-        this.right = right;
-    }
+  public int getValue() {
+    return value;
+  }
+
+  public Node getLeft() {
+    return left;
+  }
+
+  public void setLeft(Node left) {
+    this.left = left;
+  }
+
+  public Node getRight() {
+    return right;
+  }
+
+  public void setRight(Node right) {
+    this.right = right;
+  }
 }
