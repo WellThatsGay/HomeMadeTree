@@ -10,11 +10,11 @@ public class Node {
   private Node right;
 
   public Node getParent() {
-    return Parent;
+    return this.parent;
   }
 
   public void setParent(Node parent) {
-    Parent = parent;
+    this.parent = parent;
   }
 
   public Node(int val){
