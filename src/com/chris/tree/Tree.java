@@ -113,8 +113,10 @@ public class Tree {
     // Set greatest's left child to greatest's parent right child
     Node gParent = greatest.getParent();
     Node gLeftChild = greatest.getLeft();
-    gParent.setLeft(gLeftChild);
-    gLeftChild.setParent(gParent);
+    if (gLeftChild != null) {
+      gParent.setLeft(gLeftChild);
+      gLeftChild.setParent(gParent);
+    }
 
     // Set greatest's left child to toFind's left child
     greatest.setLeft(toFind.getLeft());
@@ -122,9 +124,13 @@ public class Tree {
 
     // Set greatest's right child to toFind's right child
     greatest.setRight(toFind.getRight());
-    toFind.getRight().setParent(greatest);
+    if (toFind.getRight() != null) {
+      toFind.getRight().setParent(greatest);
+    }
   }
 
+  // From startNode right greatest value
+  // This will be the most right child (will have no with now children)
   private Node findLeftGreatest(Node startNode) {
     Node greatest = startNode;
     boolean found = false;
