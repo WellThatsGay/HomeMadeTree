@@ -4,10 +4,10 @@ public class Tree {
 
   private Node root;
 
-  public Tree(){
+  public Tree() {
   }
 
-  public Tree(int val){
+  public Tree(int val) {
     this.root = new Node(val);
   }
 
@@ -75,98 +75,101 @@ public class Tree {
   }
 
 
-    public void remove(int val) {
-      Node toFind = find(val);
-      if (toFind == null) {
-        return;
-      }
-
-      if (toFind.getLeft() == null) {
-        if (toFind.getRight() == null) {
-          // No children of the node to remove
-          Node tfParent = toFind.getParent();
-          // Need to determine if this is a left or right child
-          if (tfParent.getValue() > toFind.getValue()) {
-            toFind.getParent().setLeft(null);
-          } else {
-            toFind.getParent().setRight(null);
-          }
-        }
-
-        // Node to remove has no left children
-        // Slide right child up
-        toFind.getParent().setLeft(toFind.getRight());
-        toFind.getRight().setParent(toFind.getParent());
-      } else {
-        Node greatest = findLeftGreatest(toFind.getLeft());
-        hasLeftChild(toFind, greatest);
-      }
-
+  public void remove(int val) {
+    Node toFind = find(val);
+    if (toFind == null) {
+      return;
     }
 
-    private void hasLeftChild(Node toFind, Node greatest) {
-      // Set toFind's parent's right child to greatest
-      Node tfParent = toFind.getParent();
-      tfParent.setRight(greatest);
-      greatest.setParent(tfParent);
-
-      // Set greatest's left child to greatest's parent right child
-      Node gParent = greatest.getParent();
-      Node gLeftChild = greatest.getLeft();
-      gParent.setLeft(gLeftChild);
-      gLeftChild.setParent(gParent);
-
-      // Set greatest's left child to toFind's left child
-      greatest.setLeft(toFind.getLeft());
-      toFind.getLeft().setParent(greatest);
-
-      // Set greatest's right child to toFind's right child
-      greatest.setRight(toFind.getRight());
-      toFind.getRight().setParent(greatest);
-    }
-
-    private Node findLeftGreatest(Node startNode) {
-      Node greatest = startNode;
-      boolean found = false;
-      while (!found) {
-        if (greatest.getRight() == null) {
-          return greatest;
+    if (toFind.getLeft() == null) {
+      if (toFind.getRight() == null) {
+        // No children of the node to remove
+        Node tfParent = toFind.getParent();
+        // Need to determine if this is a left or right child
+        if (tfParent.getValue() > toFind.getValue()) {
+          toFind.getParent().setLeft(null);
         } else {
-          greatest = greatest.getRight();
+          toFind.getParent().setRight(null);
         }
       }
-      return null;
+
+      // Node to remove has no left children
+      // Slide right child up
+      toFind.getParent().setLeft(toFind.getRight());
+      toFind.getRight().setParent(toFind.getParent());
+    } else {
+      Node greatest = findLeftGreatest(toFind.getLeft());
+      hasLeftChild(toFind, greatest);
     }
 
-    private Node find(int val) {
-      Node toCheck = root;
-      boolean found = false;
-      while (!found) {
-        if (val == toCheck.getValue()) {
-          return toCheck;
-        }
-        if (val > toCheck.getValue()) { // Greater than, Right child
-          if (toCheck.getRight() == null) {
-            return null;
-          } else {
-            toCheck = toCheck.getRight();
-            continue;
-          }
-        }
-        if (val <= toCheck.getValue()) { // Less than or equal, Left child
-          if (toCheck.getLeft() == null) {
-            return null;
-          } else {
-            toCheck = toCheck.getLeft();
-          }
+  }
+
+  private void hasLeftChild(Node toFind, Node greatest) {
+    // Set toFind's parent's right child to greatest
+    Node tfParent = toFind.getParent();
+    tfParent.setRight(greatest);
+    greatest.setParent(tfParent);
+
+    // Set greatest's left child to greatest's parent right child
+    Node gParent = greatest.getParent();
+    Node gLeftChild = greatest.getLeft();
+    gParent.setLeft(gLeftChild);
+    gLeftChild.setParent(gParent);
+
+    // Set greatest's left child to toFind's left child
+    greatest.setLeft(toFind.getLeft());
+    toFind.getLeft().setParent(greatest);
+
+    // Set greatest's right child to toFind's right child
+    greatest.setRight(toFind.getRight());
+    toFind.getRight().setParent(greatest);
+  }
+
+  private Node findLeftGreatest(Node startNode) {
+    Node greatest = startNode;
+    boolean found = false;
+    while (!found) {
+      if (greatest.getRight() == null) {
+        return greatest;
+      } else {
+        greatest = greatest.getRight();
+      }
+    }
+    return null;
+  }
+
+  private Node find(int val) {
+    if (this.root == null) {
+      return null;
+    }
+    Node toCheck = this.root;
+    boolean found = false;
+    while (!found) {
+      if (val == toCheck.getValue()) {
+        return toCheck;
+      }
+      if (val > toCheck.getValue()) { // Greater than, Right child
+        if (toCheck.getRight() == null) {
+          return null;
+        } else {
+          toCheck = toCheck.getRight();
+          continue;
         }
       }
-      return null;
+      if (val <= toCheck.getValue()) { // Less than or equal, Left child
+        if (toCheck.getLeft() == null) {
+          return null;
+        } else {
+          toCheck = toCheck.getLeft();
+        }
+      }
     }
+    return null;
+  }
 
-    public boolean contains(int val) {
-      return find(val) != null;
-    }
+  public boolean contains(int val) {
+    return find(val) != null;
+  }
 }
 
 
