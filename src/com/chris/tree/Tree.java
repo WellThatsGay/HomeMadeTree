@@ -11,6 +11,10 @@ public class Tree {
     this.root = new Node(val);
   }
 
+  public Node getRoot() {
+    return this.root;
+  }
+
   public void add(int val) {
     if (this.root == null) {
       this.root = new Node(val);
