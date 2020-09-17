@@ -54,30 +54,15 @@ public class Display extends GameEngine {
 //    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
 //    this.drawText(this.tree.getRoot().getValue() + "", 100, 100, Color.BLACK);
 
-    depthFirstSearch(this.tree.getRoot(), 0, false, 0);
+    depthFirstSearch(this.tree.getRoot(), 0, false, 0, 0, 0);
 
     return true;
   }
 
-  private int calculateX(int horizontalPos) {
-    return horizontalPos * 50 + 25;
-  }
-
-  private int calculateY(int level) {
-    return level * 80 + 25;
-  }
-
   // Pass -1 for root node side
-  private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace) {
+  private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace, int px, int py) {
+    // Calculate our space
     int ourSpace = parentSpace * 2 + (youAreRightChild ? 1 : 0);
-    if (!start.isLeaf()) {
-      if (start.getLeft() != null) {
-        depthFirstSearch(start.getLeft(), level+1, false, ourSpace);
-      }
-      if (start.getRight() != null) {
-        depthFirstSearch(start.getRight(), level+1, true, ourSpace);
-      }
-    }
     // Calculate spaces, max is 2^level
     int spaces = (int) Math.pow(2, level);
     // Get the spacing of each space, dividing the screen evenly
@@ -89,26 +74,34 @@ public class Display extends GameEngine {
     // Draw in the middle of the left and right positions
     int x = ((leftSide + rightSide) / 2);
     int y = calculateY(level);
+    if (!start.isLeaf()) {
+      if (start.getLeft() != null) {
+        depthFirstSearch(start.getLeft(), level+1, false, ourSpace, x, y);
+      }
+      if (start.getRight() != null) {
+        depthFirstSearch(start.getRight(), level+1, true, ourSpace, x, y);
+      }
+    }
 
     drawNode(start, x, y);
     // Draw line from ourselves to our parent
     // Do we have a parent to draw lines to?
     if (start.getParent() != null) {
-      // Get parent x/y
-      // TODO: parent x and y could be passed in as parameters to prevent the need to do these calculations twice
-      int parentLevelSpaces = (int) Math.pow(2, level-1);
-      int parentLevelScreenSpacing = SCREEN_WIDTH / parentLevelSpaces;
-      int parentLeftSide = parentLevelScreenSpacing * (parentSpace);
-      int parentRightSide = parentLevelScreenSpacing * (parentSpace + 1);
-      // Calculate parent x offsetting half the radius
-      int px = ((parentLeftSide + parentRightSide) / 2) + radius/2;
-      // Calculate parent x offsetting the radius
-      int py = calculateY(level - 1) + radius;
+      // Line starts at bottom center of parent
+      // And goes to top center of child
+      // Offset parent x start line by half of radius
+      px += radius/2;
+      // Offset parent y start line by the radius
+      py += radius;
       // Modify our x and y to make the lines look better
       int mx = x + radius/2;
       int my = y;
       this.drawLine(mx, my, px, py, Color.BLACK);
     }
+  }
+
+  private int calculateY(int level) {
+    return level * 80 + 25;
   }
 
   private void drawNode(Node node, int x, int y) {
