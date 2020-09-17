@@ -5,8 +5,7 @@ import com.chris.tree.Tree;
 import com.lazyeye79.engine.GameEngine;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.KeyEvent;
 
 public class Display extends GameEngine {
 
@@ -17,6 +16,10 @@ public class Display extends GameEngine {
 
   private Tree tree;
 
+  private String typedValue;
+
+  private boolean debug = false;
+
 
   public Display(int screenWidth, int screenHeight, String title) {
     super(screenWidth, screenHeight, title);
@@ -24,6 +27,8 @@ public class Display extends GameEngine {
 
   @Override
   protected boolean onUserStart() {
+
+    this.typedValue = "";
 
     tree = new Tree();
     tree.add(24);
@@ -49,7 +54,34 @@ public class Display extends GameEngine {
   @Override
   protected boolean onUserUpdate(float v) {
 
+    // Blank the screen before redrawing
     this.blank(Color.WHITE);
+
+    // Clear the typed value if escaped is pressed
+    if (this.keyPressed(KeyEvent.VK_ESCAPE)) {
+      this.typedValue = "";
+    }
+
+    if (this.keyTyped()) {
+      char keyTyped = this.getKeyTyped();
+      if (keyTyped == 'e' && !this.typedValue.isEmpty()) {
+        int val = Integer.parseInt(this.typedValue);
+        tree.add(val);
+        this.typedValue = "";
+      } else if (keyTyped == 'r' && !this.typedValue.isEmpty()) {
+        int val = Integer.parseInt(this.typedValue);
+        tree.remove(val);
+        this.typedValue = "";
+        this.debug = true;
+      } else {
+        this.typedValue += keyTyped;
+        this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
+      }
+    }
+
+    if (!this.typedValue.isEmpty()) {
+      this.drawText(this.typedValue, 10, 10, Color.BLACK);
+    }
 
 //    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
 //    this.drawText(this.tree.getRoot().getValue() + "", 100, 100, Color.BLACK);
@@ -61,6 +93,12 @@ public class Display extends GameEngine {
 
   // Pass -1 for root node side
   private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace, int px, int py) {
+
+    if (this.debug) {
+      System.out.println("debugging");
+      this.debug = false;
+    }
+
     // Calculate our space
     int ourSpace = parentSpace * 2 + (youAreRightChild ? 1 : 0);
     // Calculate spaces, max is 2^level
@@ -115,7 +153,7 @@ public class Display extends GameEngine {
 
     d.start();
 
-
+/*
     Tree tree = new Tree();
     if (tree.contains(5)) {
       System.out.println("Contains 5");
@@ -148,6 +186,7 @@ public class Display extends GameEngine {
     } else {
       System.out.println("Doesn't contain 12");
     }
+*/
 
   }
 }

@@ -85,6 +85,17 @@ public class Tree {
       return;
     }
 
+    // Are we a leaf
+    if (toFind.isLeaf()) {
+      // Determine what child we are
+      if (toFind.getValue() < toFind.getParent().getValue()) {
+        toFind.getParent().setLeft(null);
+      } else {
+        toFind.getParent().setRight(null);
+      }
+      return;
+    }
+
     if (toFind.getLeft() == null) {
       if (toFind.getRight() == null) {
         // No children of the node to remove
@@ -123,8 +134,12 @@ public class Tree {
     }
 
     // Set greatest's left child to toFind's left child
-    greatest.setLeft(toFind.getLeft());
-    toFind.getLeft().setParent(greatest);
+    // as long as toFind's left child is not greatest
+    // Can happen when toFind's left child has no right children
+    if (toFind.getLeft() != greatest) {
+      greatest.setLeft(toFind.getLeft());
+      toFind.getLeft().setParent(greatest);
+    }
 
     // Set greatest's right child to toFind's right child
     greatest.setRight(toFind.getRight());
