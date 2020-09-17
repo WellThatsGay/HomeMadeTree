@@ -54,48 +54,9 @@ public class Display extends GameEngine {
 //    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
 //    this.drawText(this.tree.getRoot().getValue() + "", 100, 100, Color.BLACK);
 
-    List<Node> alreadyDrawn = new ArrayList<>();
-
-    depthFirstSearch(alreadyDrawn, this.tree.getRoot(), 5, 0);
+    depthFirstSearch(this.tree.getRoot(), 0, false, 0);
 
     return true;
-  }
-
-  private void depthFirstSearch(List<Node> alreadyDrawn, Node start, int horizontalPos, int level) {
-
-    if (!alreadyDrawn.contains(start)) {
-      int x = calculateX(horizontalPos);
-      int y = calculateY(level);
-      drawNode(start, x, y);
-      alreadyDrawn.add(start);
-      if (start.getParent() != null) {
-        boolean rightChild = start.getValue() > start.getParent().getValue();
-        int mx;
-        if (rightChild) {
-          mx = x;
-        } else {
-          mx = x + radius;
-        }
-        int my = y;
-        int px;
-        if (rightChild) {
-          px = calculateX(horizontalPos-(4 - level));
-        } else {
-          px = calculateX(horizontalPos+(4 - level)) + radius;
-        }
-        int py = calculateY(level-1) + radius;
-        this.drawLine(mx, my, px, py, Color.BLACK);
-      }
-    }
-    if (start.isLeaf()) {
-      return;
-    }
-    if (start.getLeft() != null) {
-      depthFirstSearch(alreadyDrawn, start.getLeft(), horizontalPos-(4 - level), level+1);
-    }
-    if (start.getRight() != null) {
-      depthFirstSearch(alreadyDrawn, start.getRight(), horizontalPos+(4 - level), level+1);
-    }
   }
 
   private int calculateX(int horizontalPos) {
@@ -104,6 +65,50 @@ public class Display extends GameEngine {
 
   private int calculateY(int level) {
     return level * 80 + 25;
+  }
+
+  // Pass -1 for root node side
+  private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace) {
+    int ourSpace = parentSpace * 2 + (youAreRightChild ? 1 : 0);
+    if (!start.isLeaf()) {
+      if (start.getLeft() != null) {
+        depthFirstSearch(start.getLeft(), level+1, false, ourSpace);
+      }
+      if (start.getRight() != null) {
+        depthFirstSearch(start.getRight(), level+1, true, ourSpace);
+      }
+    }
+    // Calculate spaces, max is 2^level
+    int spaces = (int) Math.pow(2, level);
+    // Get the spacing of each space, dividing the screen evenly
+    int screenSpacing = SCREEN_WIDTH / spaces;
+    // Our starting left position
+    int leftSide = screenSpacing * (ourSpace);
+    // Our start right position
+    int rightSide = screenSpacing * (ourSpace + 1);
+    // Draw in the middle of the left and right positions
+    int x = ((leftSide + rightSide) / 2);
+    int y = calculateY(level);
+
+    drawNode(start, x, y);
+    // Draw line from ourselves to our parent
+    // Do we have a parent to draw lines to?
+    if (start.getParent() != null) {
+      // Get parent x/y
+      // TODO: parent x and y could be passed in as parameters to prevent the need to do these calculations twice
+      int parentLevelSpaces = (int) Math.pow(2, level-1);
+      int parentLevelScreenSpacing = SCREEN_WIDTH / parentLevelSpaces;
+      int parentLeftSide = parentLevelScreenSpacing * (parentSpace);
+      int parentRightSide = parentLevelScreenSpacing * (parentSpace + 1);
+      // Calculate parent x offsetting half the radius
+      int px = ((parentLeftSide + parentRightSide) / 2) + radius/2;
+      // Calculate parent x offsetting the radius
+      int py = calculateY(level - 1) + radius;
+      // Modify our x and y to make the lines look better
+      int mx = x + radius/2;
+      int my = y;
+      this.drawLine(mx, my, px, py, Color.BLACK);
+    }
   }
 
   private void drawNode(Node node, int x, int y) {
