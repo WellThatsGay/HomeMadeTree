@@ -61,22 +61,21 @@ public class Display extends GameEngine {
     if (this.keyPressed(KeyEvent.VK_ESCAPE)) {
       this.typedValue = "";
     }
+    if (this.keyReleased(KeyEvent.VK_E)) {
+      int val = Integer.parseInt(this.typedValue);
+      tree.add(val);
+      this.typedValue = "";
+    } else if (this.keyReleased(KeyEvent.VK_R)) {
+      int val = Integer.parseInt(this.typedValue);
+      tree.remove(val);
+      this.typedValue = "";
+      this.debug = true;
+    }
 
     if (this.keyTyped()) {
       char keyTyped = this.getKeyTyped();
-      if (keyTyped == 'e' && !this.typedValue.isEmpty()) {
-        int val = Integer.parseInt(this.typedValue);
-        tree.add(val);
-        this.typedValue = "";
-      } else if (keyTyped == 'r' && !this.typedValue.isEmpty()) {
-        int val = Integer.parseInt(this.typedValue);
-        tree.remove(val);
-        this.typedValue = "";
-        this.debug = true;
-      } else {
-        this.typedValue += keyTyped;
-        this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
-      }
+      this.typedValue += keyTyped;
+      this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
     }
 
     if (!this.typedValue.isEmpty()) {
