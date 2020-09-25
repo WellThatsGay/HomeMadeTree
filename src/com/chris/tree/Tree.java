@@ -122,30 +122,42 @@ public class Tree {
   private void hasLeftChild(Node toFind, Node greatest) {
     // Set toFind's parent's right child to greatest
     Node tfParent = toFind.getParent();
-    tfParent.setRight(greatest);
-    greatest.setParent(tfParent);
+    if(toFind.getValue() > tfParent.getValue()) {
+      tfParent.setRight(greatest);
+    } else {
+      tfParent.setLeft(greatest);
+    }
 
     // Set greatest's left child to greatest's parent right child
     Node gParent = greatest.getParent();
     Node gLeftChild = greatest.getLeft();
-    if (gLeftChild != null) {
-      gParent.setLeft(gLeftChild);
-      gLeftChild.setParent(gParent);
-    }
-
-    // Set greatest's left child to toFind's left child
-    // as long as toFind's left child is not greatest
-    // Can happen when toFind's left child has no right children
-    if (toFind.getLeft() != greatest) {
+    if(toFind.getLeft() != greatest) {
+      if (gLeftChild != null) {
+        gParent.setRight(gLeftChild);
+        gLeftChild.setParent(gParent);
+      } else {
+        gParent.setRight(null);
+      }
+      // Set greatest's left child to toFind's left child
+      // as long as toFind's left child is not greatest
+      // Can happen when toFind's left child has no right children
       greatest.setLeft(toFind.getLeft());
       toFind.getLeft().setParent(greatest);
     }
+
 
     // Set greatest's right child to toFind's right child
     greatest.setRight(toFind.getRight());
     if (toFind.getRight() != null) {
       toFind.getRight().setParent(greatest);
     }
+    // Lastly set greatest's parent to toFind's parent
+    greatest.setParent(tfParent);
+
+    // Clean up toFind
+    toFind.setParent(null);
+    toFind.setRight(null);
+    toFind.setLeft(null);
   }
 
   // From startNode right greatest value
