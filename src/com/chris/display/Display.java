@@ -6,6 +6,7 @@ import com.lazyeye79.engine.GameEngine;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
 public class Display extends GameEngine {
 
@@ -69,6 +70,30 @@ public class Display extends GameEngine {
     if (this.keyPressed(KeyEvent.VK_ESCAPE)) {
       this.typedValue = "";
     }
+    if (!this.typedValue.isEmpty()) {
+      if (this.keyReleased(KeyEvent.VK_E)) {
+        int val = Integer.parseInt(this.typedValue);
+        tree.add(val);
+        this.typedValue = "";
+      } else if (this.keyReleased(KeyEvent.VK_R)) {
+        int val = Integer.parseInt(this.typedValue);
+        tree.remove(val);
+        this.typedValue = "";
+        this.debug = true;
+      }
+    }
+
+    if (this.keyTyped()) {
+      char keyTyped = this.getKeyTyped();
+      this.typedValue += keyTyped;
+      this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
+    }
+
+    if (!this.typedValue.isEmpty()) {
+      this.drawText(this.typedValue, 10, 10, Color.BLACK);
+    }
+
+    // Move the camera
     if (this.keyPressed(KeyEvent.VK_RIGHT)) {
       this.cameraXOffset -= (speed * elapsedTime);
     }
@@ -81,25 +106,15 @@ public class Display extends GameEngine {
     if (this.keyPressed(KeyEvent.VK_DOWN)) {
       this.cameraYOffset -= (speed * elapsedTime);
     }
-    if (this.keyReleased(KeyEvent.VK_E)) {
-      int val = Integer.parseInt(this.typedValue);
-      tree.add(val);
-      this.typedValue = "";
-    } else if (this.keyReleased(KeyEvent.VK_R)) {
-      int val = Integer.parseInt(this.typedValue);
-      tree.remove(val);
-      this.typedValue = "";
-      this.debug = true;
-    }
 
-    if (this.keyTyped()) {
-      char keyTyped = this.getKeyTyped();
-      this.typedValue += keyTyped;
-      this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
+    MouseEvent mr = this.getMouseReleasedEvent();
+    MouseEvent md = this.getMouseDraggedEvent();
+    if (md != null) {
+      this.cameraXOffset = md.getX();
+      this.cameraYOffset = md.getY();
     }
-
-    if (!this.typedValue.isEmpty()) {
-      this.drawText(this.typedValue, 10, 10, Color.BLACK);
+    if (mr != null) {
+      this.resetMouseDraggedEvent();
     }
 
 //    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
