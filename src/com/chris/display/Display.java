@@ -13,10 +13,10 @@ public class Display extends GameEngine {
   public static final int SCREEN_HEIGHT = 400;
 
   private static int radius = 50;
-  private static int horizontalSpace = 2_000;
   private static float speed = 150;
 
   private Tree tree;
+  private int horizontalSpace;
 
   private float cameraXOffset;
   private float cameraYOffset;
@@ -59,6 +59,8 @@ public class Display extends GameEngine {
 
   @Override
   protected boolean onUserUpdate(float elapsedTime) {
+
+    this.horizontalSpace = (int) (radius * Math.pow(2, this.tree.getLevels()) + (radius * 16));
 
     // Blank the screen before redrawing
     this.blank(Color.WHITE);
@@ -162,7 +164,7 @@ public class Display extends GameEngine {
   }
 
   private int calculateY(int level) {
-    return level * 80 + 25;
+    return level * (80 + (5 * this.tree.getLevels())) + 25;
   }
 
   private void drawNode(Node node, int x, int y) {

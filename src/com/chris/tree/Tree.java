@@ -3,16 +3,22 @@ package com.chris.tree;
 public class Tree {
 
   private Node root;
+  private int levels;
 
   public Tree() {
   }
 
   public Tree(int val) {
     this.root = new Node(val);
+    this.levels = 0;
   }
 
   public Node getRoot() {
     return this.root;
+  }
+
+  public int getLevels() {
+    return this.levels;
   }
 
   public void add(int val) {
@@ -22,7 +28,7 @@ public class Tree {
     }
 
     // Already have a root
-    addHelper(this.root, val);
+    addHelper(this.root, val, 0);
     //addHelperLoop(this.root, int val);
   }
 
@@ -53,15 +59,18 @@ public class Tree {
     }
   }
 
-  private void addHelper(Node currentNode, int val) {
+  private void addHelper(Node currentNode, int val, int level) {
     if (val > currentNode.getValue()) { // Greater than, Right child
       if (currentNode.getRight() == null) {
         Node newNode = new Node(val);
         currentNode.setRight(newNode);
         newNode.setParent(currentNode);
+        if (level > this.levels) {
+          this.levels = level;
+        }
         return;
       } else {
-        addHelper(currentNode.getRight(), val);
+        addHelper(currentNode.getRight(), val, ++level);
         return;
       }
     }
@@ -70,9 +79,12 @@ public class Tree {
         Node newNode = new Node(val);
         currentNode.setLeft(newNode);
         newNode.setParent(currentNode);
+        if (level > this.levels) {
+          this.levels = level;
+        }
         return;
       } else {
-        addHelper(currentNode.getLeft(), val);
+        addHelper(currentNode.getLeft(), val, ++level);
         return;
       }
     }
