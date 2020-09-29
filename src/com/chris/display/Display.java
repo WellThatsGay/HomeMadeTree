@@ -32,16 +32,16 @@ public class Display extends GameEngine {
 
     tree = new Tree();
     tree.add(24);
-    tree.add(13);
-    tree.add(28);
-    tree.add(17);
-    tree.add(25);
-    tree.add(31);
-    tree.add(14);
-    tree.add(19);
-    tree.add(27);
-    tree.add(28);
-    tree.add(26);
+//    tree.add(13);
+//    tree.add(28);
+//    tree.add(17);
+//    tree.add(25);
+//    tree.add(31);
+//    tree.add(14);
+//    tree.add(19);
+//    tree.add(27);
+//    tree.add(28);
+//    tree.add(26);
 
     return true;
   }

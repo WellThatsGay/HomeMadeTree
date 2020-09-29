@@ -87,34 +87,39 @@ public class Tree {
 
     // Are we a leaf
     if (toFind.isLeaf()) {
-      // Determine what child we are
-      if (toFind.getValue() < toFind.getParent().getValue()) {
-        toFind.getParent().setLeft(null);
-      } else {
-        toFind.getParent().setRight(null);
-      }
-      return;
-    }
-
-    if (toFind.getLeft() == null) {
-      if (toFind.getRight() == null) {
-        // No children of the node to remove
-        Node tfParent = toFind.getParent();
-        // Need to determine if this is a left or right child
-        if (tfParent.getValue() > toFind.getValue()) {
+      if (toFind.getParent() != null) {
+        // Determine what child we are
+        if (toFind.getValue() <= toFind.getParent().getValue()) {
           toFind.getParent().setLeft(null);
         } else {
           toFind.getParent().setRight(null);
         }
       }
+      return;
+    }
+
+    if (toFind.getLeft() == null) {
 
       // Node to remove has no left children
       // Slide right child up
-      toFind.getParent().setLeft(toFind.getRight());
+      if (toFind.getParent() != null) {
+        if (toFind.getValue() <= toFind.getParent().getValue()) {
+
+          toFind.getParent().setLeft(toFind.getRight());
+        } else {
+          toFind.getParent().setRight(toFind.getRight());
+        }
+      }
       toFind.getRight().setParent(toFind.getParent());
+      if (this.root == toFind) {
+        this.root = toFind.getRight();
+      }
     } else {
       Node greatest = findLeftGreatest(toFind.getLeft());
       hasLeftChild(toFind, greatest);
+      if (this.root == toFind) {
+        this.root = greatest;
+      }
     }
 
   }
@@ -122,12 +127,13 @@ public class Tree {
   private void hasLeftChild(Node toFind, Node greatest) {
     // Set toFind's parent's right child to greatest
     Node tfParent = toFind.getParent();
-    if(toFind.getValue() > tfParent.getValue()) {
-      tfParent.setRight(greatest);
-    } else {
-      tfParent.setLeft(greatest);
+    if (tfParent != null) {
+      if (toFind.getValue() > tfParent.getValue()) {
+        tfParent.setRight(greatest);
+      } else {
+        tfParent.setLeft(greatest);
+      }
     }
-
     // Set greatest's left child to greatest's parent right child
     Node gParent = greatest.getParent();
     Node gLeftChild = greatest.getLeft();
