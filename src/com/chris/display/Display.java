@@ -13,8 +13,14 @@ public class Display extends GameEngine {
   public static final int SCREEN_HEIGHT = 400;
 
   private static int radius = 50;
+  private static int horizontalSpace = 2_000;
+  private static float speed = 150;
 
   private Tree tree;
+
+  private float cameraXOffset;
+  private float cameraYOffset;
+  private boolean center = true;
 
   private String typedValue;
 
@@ -32,16 +38,16 @@ public class Display extends GameEngine {
 
     tree = new Tree();
     tree.add(24);
-//    tree.add(13);
-//    tree.add(28);
-//    tree.add(17);
-//    tree.add(25);
-//    tree.add(31);
-//    tree.add(14);
-//    tree.add(19);
-//    tree.add(27);
-//    tree.add(28);
-//    tree.add(26);
+    tree.add(13);
+    tree.add(28);
+    tree.add(17);
+    tree.add(25);
+    tree.add(31);
+    tree.add(14);
+    tree.add(19);
+    tree.add(27);
+    tree.add(28);
+    tree.add(26);
 
     return true;
   }
@@ -52,7 +58,7 @@ public class Display extends GameEngine {
   }
 
   @Override
-  protected boolean onUserUpdate(float v) {
+  protected boolean onUserUpdate(float elapsedTime) {
 
     // Blank the screen before redrawing
     this.blank(Color.WHITE);
@@ -60,6 +66,18 @@ public class Display extends GameEngine {
     // Clear the typed value if escaped is pressed
     if (this.keyPressed(KeyEvent.VK_ESCAPE)) {
       this.typedValue = "";
+    }
+    if (this.keyPressed(KeyEvent.VK_RIGHT)) {
+      this.cameraXOffset -= (speed * elapsedTime);
+    }
+    if (this.keyPressed(KeyEvent.VK_LEFT)) {
+      this.cameraXOffset += (speed * elapsedTime);
+    }
+    if (this.keyPressed(KeyEvent.VK_UP)) {
+      this.cameraYOffset += (speed * elapsedTime);
+    }
+    if (this.keyPressed(KeyEvent.VK_DOWN)) {
+      this.cameraYOffset -= (speed * elapsedTime);
     }
     if (this.keyReleased(KeyEvent.VK_E)) {
       int val = Integer.parseInt(this.typedValue);
@@ -85,7 +103,9 @@ public class Display extends GameEngine {
 //    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
 //    this.drawText(this.tree.getRoot().getValue() + "", 100, 100, Color.BLACK);
 
-    depthFirstSearch(this.tree.getRoot(), 0, false, 0, 0, 0);
+    if (this.tree.getRoot() != null) {
+      depthFirstSearch(this.tree.getRoot(), 0, false, 0, 0, 0);
+    }
 
     return true;
   }
@@ -94,7 +114,6 @@ public class Display extends GameEngine {
   private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace, int px, int py) {
 
     if (this.debug) {
-      System.out.println("debugging");
       this.debug = false;
     }
 
@@ -103,7 +122,7 @@ public class Display extends GameEngine {
     // Calculate spaces, max is 2^level
     int spaces = (int) Math.pow(2, level);
     // Get the spacing of each space, dividing the screen evenly
-    int screenSpacing = SCREEN_WIDTH / spaces;
+    int screenSpacing = horizontalSpace / spaces;
     // Our starting left position
     int leftSide = screenSpacing * (ourSpace);
     // Our start right position
@@ -111,6 +130,11 @@ public class Display extends GameEngine {
     // Draw in the middle of the left and right positions
     int x = ((leftSide + rightSide) / 2);
     int y = calculateY(level);
+    if (start == this.tree.getRoot() && this.center) {
+      this.cameraXOffset = -x/2;
+      this.cameraYOffset = y;
+      this.center = false;
+    }
     if (!start.isLeaf()) {
       if (start.getLeft() != null) {
         depthFirstSearch(start.getLeft(), level+1, false, ourSpace, x, y);
@@ -133,7 +157,7 @@ public class Display extends GameEngine {
       // Modify our x and y to make the lines look better
       int mx = x + radius/2;
       int my = y;
-      this.drawLine(mx, my, px, py, Color.BLACK);
+      this.drawLine(mx + this.cameraXOffset, my + this.cameraYOffset, px + this.cameraXOffset, py + this.cameraYOffset, Color.BLACK);
     }
   }
 
@@ -142,8 +166,8 @@ public class Display extends GameEngine {
   }
 
   private void drawNode(Node node, int x, int y) {
-    this.drawOval(x, y, radius, radius, Color.BLACK);
-    this.drawText(node.getValue() + "", x + radius/2, y + radius/2, Color.BLACK);
+    this.drawOval(x + this.cameraXOffset, y + this.cameraYOffset, radius, radius, Color.BLACK);
+    this.drawText(node.getValue() + "", x + radius/2 + this.cameraXOffset, y + radius/2 + this.cameraYOffset, Color.BLACK);
   }
 
 
