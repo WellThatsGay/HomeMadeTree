@@ -58,76 +58,94 @@ public class Display extends GameEngine {
 //    System.out.println("Goodbye");
   }
 
+  GraphicalTree gt = new GraphicalTree();
+  float trackTime = 0.0f;
+
   @Override
   protected boolean onUserUpdate(float elapsedTime) {
 
-    this.horizontalSpace = (int) (radius * Math.pow(2, this.tree.getLevels()) + (radius * 16));
-
-    // Blank the screen before redrawing
     this.blank(Color.WHITE);
-
-    // Clear the typed value if escaped is pressed
-    if (this.keyPressed(KeyEvent.VK_ESCAPE)) {
-      this.typedValue = "";
+    if (gt.getRoot() == null) {
+      gt.add(24);
     }
-    if (!this.typedValue.isEmpty()) {
-      if (this.keyReleased(KeyEvent.VK_E)) {
-        int val = Integer.parseInt(this.typedValue);
-        tree.add(val);
-        this.typedValue = "";
-      } else if (this.keyReleased(KeyEvent.VK_R)) {
-        int val = Integer.parseInt(this.typedValue);
-        tree.remove(val);
-        this.typedValue = "";
-        this.debug = true;
+    if (!gt.isStillAdding()) {
+      gt.add(55);
+    } else {
+      trackTime += elapsedTime;
+      if (trackTime > 1.0f) {
+        trackTime = 0.0f;
+        gt.continueAdding();
       }
     }
+    this.draw(gt);
 
-    if (this.keyTyped()) {
-      char keyTyped = this.getKeyTyped();
-      this.typedValue += keyTyped;
-      this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
-    }
 
-    if (!this.typedValue.isEmpty()) {
-      this.drawText(this.typedValue, 10, 10, Color.BLACK);
-    }
-
-    // Move the camera
-    if (this.keyPressed(KeyEvent.VK_RIGHT)) {
-      this.cameraXOffset -= (speed * elapsedTime);
-    }
-    if (this.keyPressed(KeyEvent.VK_LEFT)) {
-      this.cameraXOffset += (speed * elapsedTime);
-    }
-    if (this.keyPressed(KeyEvent.VK_UP)) {
-      this.cameraYOffset += (speed * elapsedTime);
-    }
-    if (this.keyPressed(KeyEvent.VK_DOWN)) {
-      this.cameraYOffset -= (speed * elapsedTime);
-    }
-
-    MouseEvent mr = this.getMouseReleasedEvent();
-    MouseEvent md = this.getMouseDraggedEvent();
-    if (md != null) {
-      this.cameraXOffset = md.getX();
-      this.cameraYOffset = md.getY();
-    }
-    if (mr != null) {
-      this.resetMouseDraggedEvent();
-    }
-
-//    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
-//    this.drawText(this.tree.getRoot().getValue() + "", 100, 100, Color.BLACK);
-
-    if (this.tree.getRoot() != null) {
-      depthFirstSearch(this.tree.getRoot(), 0, false, 0, 0, 0);
-    }
+//    this.horizontalSpace = (int) (radius * Math.pow(2, this.tree.getLevels()) + (radius * 16));
+//
+//    // Blank the screen before redrawing
+//    this.blank(Color.WHITE);
+//
+//    // Clear the typed value if escaped is pressed
+//    if (this.keyPressed(KeyEvent.VK_ESCAPE)) {
+//      this.typedValue = "";
+//    }
+//    if (!this.typedValue.isEmpty()) {
+//      if (this.keyReleased(KeyEvent.VK_E)) {
+//        int val = Integer.parseInt(this.typedValue);
+//        tree.add(val);
+//        this.typedValue = "";
+//      } else if (this.keyReleased(KeyEvent.VK_R)) {
+//        int val = Integer.parseInt(this.typedValue);
+//        tree.remove(val);
+//        this.typedValue = "";
+//        this.debug = true;
+//      }
+//    }
+//
+//    if (this.keyTyped()) {
+//      char keyTyped = this.getKeyTyped();
+//      this.typedValue += keyTyped;
+//      this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
+//    }
+//
+//    if (!this.typedValue.isEmpty()) {
+//      this.drawText(this.typedValue, 10, 10, Color.BLACK);
+//    }
+//
+//    // Move the camera
+//    if (this.keyPressed(KeyEvent.VK_RIGHT)) {
+//      this.cameraXOffset -= (speed * elapsedTime);
+//    }
+//    if (this.keyPressed(KeyEvent.VK_LEFT)) {
+//      this.cameraXOffset += (speed * elapsedTime);
+//    }
+//    if (this.keyPressed(KeyEvent.VK_UP)) {
+//      this.cameraYOffset += (speed * elapsedTime);
+//    }
+//    if (this.keyPressed(KeyEvent.VK_DOWN)) {
+//      this.cameraYOffset -= (speed * elapsedTime);
+//    }
+//
+//    MouseEvent mr = this.getMouseReleasedEvent();
+//    MouseEvent md = this.getMouseDraggedEvent();
+//    if (md != null) {
+//      this.cameraXOffset = md.getX();
+//      this.cameraYOffset = md.getY();
+//    }
+//    if (mr != null) {
+//      this.resetMouseDraggedEvent();
+//    }
+//
+////    this.drawOval(100 - this.radius/2, 100 - this.radius/2, this.radius, this.radius, Color.BLACK);
+////    this.drawText(this.tree.getRoot().getValue() + "", 100, 100, Color.BLACK);
+//
+//    if (this.tree.getRoot() != null) {
+//      depthFirstSearch(this.tree.getRoot(), 0, false, 0, 0, 0);
+//    }
 
     return true;
   }
 
-  // Pass -1 for root node side
   private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace, int px, int py) {
 
     if (this.debug) {
@@ -139,7 +157,7 @@ public class Display extends GameEngine {
     // Calculate spaces, max is 2^level
     int spaces = (int) Math.pow(2, level);
     // Get the spacing of each space, dividing the screen evenly
-    int screenSpacing = horizontalSpace / spaces;
+    int screenSpacing = this.horizontalSpace / spaces;
     // Our starting left position
     int leftSide = screenSpacing * (ourSpace);
     // Our start right position
