@@ -5,6 +5,7 @@ import com.chris.tree.Tree;
 import com.lazyeye79.engine.GameEngine;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -13,7 +14,7 @@ public class Display extends GameEngine {
   public static final int SCREEN_WIDTH = 800;
   public static final int SCREEN_HEIGHT = 400;
 
-  private static int radius = 50;
+  private static int radius = 25;
   private static float speed = 150;
 
   private Tree tree;
@@ -21,6 +22,7 @@ public class Display extends GameEngine {
 
   private float cameraXOffset;
   private float cameraYOffset;
+  private float scale = 1.0f;
   private boolean center = true;
 
   private String typedValue;
@@ -61,7 +63,7 @@ public class Display extends GameEngine {
   @Override
   protected boolean onUserUpdate(float elapsedTime) {
 
-    this.horizontalSpace = (int) (radius * Math.pow(2, this.tree.getLevels()) + (radius * 16));
+    this.horizontalSpace = (int) (radius * 2 * Math.pow(2, this.tree.getLevels()) + (radius * 2 * 16));
 
     // Blank the screen before redrawing
     this.blank(Color.WHITE);
@@ -85,6 +87,12 @@ public class Display extends GameEngine {
 
     if (this.keyTyped()) {
       char keyTyped = this.getKeyTyped();
+      if (keyTyped == 'z') {
+        this.scale += 0.1f;
+      }
+      if (keyTyped == 'x') {
+        this.scale -= 0.1f;
+      }
       this.typedValue += keyTyped;
       this.typedValue = this.typedValue.replaceAll("[^0-9]+", "");
     }
@@ -167,14 +175,14 @@ public class Display extends GameEngine {
     if (start.getParent() != null) {
       // Line starts at bottom center of parent
       // And goes to top center of child
-      // Offset parent x start line by half of radius
-      px += radius/2;
+      // Offset parent x start line the radius
+      px += radius;
       // Offset parent y start line by the radius
-      py += radius;
+      py += radius*2;
       // Modify our x and y to make the lines look better
-      int mx = x + radius/2;
+      int mx = x + radius;
       int my = y;
-      this.drawLine(mx + this.cameraXOffset, my + this.cameraYOffset, px + this.cameraXOffset, py + this.cameraYOffset, Color.BLACK);
+      this.drawLine(mx * scale + this.cameraXOffset, my * scale + this.cameraYOffset, px * scale + this.cameraXOffset, py * scale + this.cameraYOffset, Color.BLACK);
     }
   }
 
@@ -183,8 +191,9 @@ public class Display extends GameEngine {
   }
 
   private void drawNode(Node node, int x, int y) {
-    this.drawOval(x + this.cameraXOffset, y + this.cameraYOffset, radius, radius, Color.BLACK);
-    this.drawText(node.getValue() + "", x + radius/2 + this.cameraXOffset, y + radius/2 + this.cameraYOffset, Color.BLACK);
+    this.drawOval(x * scale + this.cameraXOffset, y * scale + this.cameraYOffset, radius*2 * scale, radius*2 * scale, Color.BLACK);
+    Font font = new Font("Node font", 0, (int) (12 * scale));
+    this.drawText(node.getValue() + "", (int) ((x + radius) * scale + this.cameraXOffset), (int) ((y + radius) * scale + this.cameraYOffset), Color.BLACK, font);
   }
 
 
