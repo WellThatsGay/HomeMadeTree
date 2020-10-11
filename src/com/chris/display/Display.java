@@ -24,9 +24,16 @@ public class Display extends GameEngine {
   private static final String NUM_REGEX = "[^0-9]+";
   private static final String ADDRESS_REGEX = "[^a-zA-Z0-9.]+";
 
+  private static final int INPUT_X = 10;
+  private static final int INPUT_Y = 13;
+
   private static final String ENTER_PORT = "Enter Port";
   private static final String ENTER_ADDRESS = "Enter Address";
   private static final String CONNECTING = "Connecting";
+  private static final int CONNECTING_TEXT_X = 10;
+  private static final int CONNECTING_TEXT_Y = 30;
+
+  private static final int COMMON_HEIGHT = 20;
 
 
 
@@ -93,12 +100,14 @@ public class Display extends GameEngine {
 
     this.typedValue = "";
 
-    this.offline = new Button(50, 25, 50, 20, Color.GRAY, "Offline", Color.BLACK);
-    this.host = new Button(125, 25, 50, 20, Color.GRAY, "Host", Color.BLACK);
-    this.join = new Button(200, 25, 50, 20, Color.GRAY, "Join", Color.BLACK);
-    this.next = new Button(SCREEN_WIDTH - 100, 25, 50, 20, Color.GRAY, "Next", Color.BLACK, false, Color.DARK_GRAY);
+    this.offline = new Button(50, 25, 50, COMMON_HEIGHT, Color.GRAY, "Offline", Color.BLACK);
+    this.host = new Button(125, 25, 50, COMMON_HEIGHT, Color.GRAY, "Host", Color.BLACK);
+    this.join = new Button(200, 25, 50, COMMON_HEIGHT, Color.GRAY, "Join", Color.BLACK);
 
-    this.typedValueBackground = new Rectangle(8, 0, 100, 12, Color.GRAY, true);
+    this.typedValueBackground = new Rectangle(INPUT_X-2, INPUT_Y-15, 100, COMMON_HEIGHT, Color.GRAY, true);
+    this.next = new Button(this.typedValueBackground.getX() + this.typedValueBackground.getWidth() + 10,
+            this.typedValueBackground.getY(), 50, COMMON_HEIGHT, Color.GRAY, "Next", Color.BLACK, false, Color.DARK_GRAY);
+
 
     return true;
   }
@@ -121,7 +130,7 @@ public class Display extends GameEngine {
 
     if (this.keyTyped()) {
       char keyTyped = this.getKeyTyped();
-      if (keyTyped == KeyEvent.VK_BACK_SPACE) {
+      if (keyTyped == KeyEvent.VK_BACK_SPACE && !this.typedValue.isEmpty()) {
         this.typedValue = this.typedValue.substring(0, this.typedValue.length()-1);
       } else {
         this.typedValue += keyTyped;
@@ -191,11 +200,6 @@ public class Display extends GameEngine {
           }
         }
 
-        this.draw(this.typedValueBackground);
-        if (!this.typedValue.isEmpty()) {
-          this.drawText(this.typedValue, 10, 10, Color.BLACK);
-        }
-
         // Move the camera
         if (this.keyPressed(KeyEvent.VK_RIGHT)) {
           this.cameraXOffset -= (speed * elapsedTime);
@@ -252,7 +256,7 @@ public class Display extends GameEngine {
         break;
       case HOST:
 
-        this.drawText(ENTER_PORT, 20, 20, Color.BLACK);
+        this.drawText(ENTER_PORT, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
 
         this.typedValue = sanitize(this.typedValue, NUM_REGEX);
         if (this.typedValue.isEmpty()) {
@@ -262,9 +266,6 @@ public class Display extends GameEngine {
         }
 
         this.draw(this.next);
-        if (!this.typedValue.isEmpty()) {
-          this.drawText(this.typedValue, 20, 50, Color.BLACK);
-        }
 
         if (mouseClicked != null) {
           if (this.next.inBounds(mouseClicked.getX(), mouseClicked.getY())) {
@@ -281,6 +282,8 @@ public class Display extends GameEngine {
         break;
       case ADDRESS:
 
+        this.drawText(ENTER_ADDRESS, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
+
         this.typedValue = sanitize(this.typedValue, ADDRESS_REGEX);
         if (this.typedValue.isEmpty()) {
           this.next.disable();
@@ -289,9 +292,6 @@ public class Display extends GameEngine {
         }
 
         this.draw(this.next);
-        if (!this.typedValue.isEmpty()) {
-          this.drawText(this.typedValue, 20, 50, Color.BLACK);
-        }
 
         if (mouseClicked != null) {
           if (this.next.inBounds(mouseClicked.getX(), mouseClicked.getY())) {
@@ -307,6 +307,8 @@ public class Display extends GameEngine {
           break;
         }
 
+        this.drawText(ENTER_PORT, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
+
         this.typedValue = sanitize(this.typedValue, NUM_REGEX);
         if (this.typedValue.isEmpty()) {
           this.next.disable();
@@ -315,9 +317,6 @@ public class Display extends GameEngine {
         }
 
         this.draw(this.next);
-        if (!this.typedValue.isEmpty()) {
-          this.drawText(this.typedValue, 20, 50, Color.BLACK);
-        }
 
         if (mouseClicked != null) {
           if (this.next.inBounds(mouseClicked.getX(), mouseClicked.getY())) {
@@ -328,6 +327,7 @@ public class Display extends GameEngine {
         }
         break;
       case JOIN:
+        this.drawText(CONNECTING, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
         if (this.address == null || this.port == null) {
           this.state = State.SETUP;
         } else if (this.client == null) {
@@ -337,6 +337,7 @@ public class Display extends GameEngine {
         this.state = State.CONNECTING;
         break;
       case CONNECTING:
+        this.drawText(CONNECTING, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
         if (client.isReady()) {
           this.state = State.RUNNING;
         }
@@ -345,8 +346,16 @@ public class Display extends GameEngine {
         }
     }
 
+
+    if (this.state != State.SETUP) {
+      this.draw(this.typedValueBackground);
+      if (!this.typedValue.isEmpty()) {
+        this.drawText(this.typedValue, INPUT_X, INPUT_Y, Color.BLACK);
+      }
+    }
+
     // Go to the setup page if there was an error in the client
-    // TODO: Check what the error was before abandoning it
+    // TODO: Check what the error was before abandoning the client
     if (this.client != null) {
       if (this.client.getException() != null) {
         this.state = State.SETUP;
