@@ -1,13 +1,13 @@
 package com.chris.display;
 
 import com.chris.element.Button;
+import com.chris.server.TreeServer;
 import com.chris.tree.Node;
 import com.chris.tree.Tree;
 import com.lazyeye79.engine.GameEngine;
 import com.lazyeye79.engine.draw.Rectangle;
 import com.lazyeye79.network.Message;
 import com.lazyeye79.network.client.Client;
-import com.lazyeye79.network.server.Server;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -29,6 +29,7 @@ public class Display extends GameEngine {
 
   private static final String ENTER_PORT = "Enter Port";
   private static final String ENTER_ADDRESS = "Enter Address";
+  private static final String STARTING_SERVER = "Starting Server";
   private static final String CONNECTING = "Connecting";
   private static final int CONNECTING_TEXT_X = 10;
   private static final int CONNECTING_TEXT_Y = 30;
@@ -41,15 +42,15 @@ public class Display extends GameEngine {
   private static float speed = 150;
 
   public enum State {
-    SETUP, RUNNING, HOST, ADDRESS, PORT, JOIN, CONNECTING
+    SETUP, RUNNING, HOST, STARTING_SERVER, ADDRESS, PORT, JOIN, CONNECTING
   }
 
   public enum Actions {
-    ADD, REMOVE
+    ADD, REMOVE, TREE
   }
 
   private Client client;
-  private Server server;
+  private TreeServer treeServer;
   private Integer port;
   private String address;
   private boolean portAlreadySet;
@@ -72,8 +73,6 @@ public class Display extends GameEngine {
   private Rectangle typedValueBackground;
 
   private State state;
-
-  private boolean debug = false;
 
 
   public Display(int screenWidth, int screenHeight, String title) {
@@ -148,11 +147,12 @@ public class Display extends GameEngine {
         if (this.client != null) {
           while (this.client.isDataAvailable()) {
             Message received = this.client.getReceivedData();
-            int payload = (int) received.getPayload();
-            if (received.getId() == Actions.ADD) {
-              this.tree.add(payload);
+            if (received.getId() == Actions.TREE) {
+              this.tree = (Tree) received.getPayload();
+            } else if (received.getId() == Actions.ADD) {
+              this.tree.add((int) received.getPayload());
             } else {
-              this.tree.remove(payload);
+              this.tree.remove((int) received.getPayload());
             }
           }
         }
@@ -245,13 +245,13 @@ public class Display extends GameEngine {
             this.state = State.HOST;
           }
           if (this.join.inBounds(x, y)) {
-            this.state = State.JOIN;
+            this.state = State.ADDRESS;
           }
         }
 
         // Need to know if offline, hosting, joining
         // If offline, enter RUNNING state
-        // If hosting, setup port for server, then join
+        // If hosting, setup port for treeServer, then join
         // If joining, setup address and port for client
         break;
       case HOST:
@@ -272,13 +272,23 @@ public class Display extends GameEngine {
             this.port = Integer.parseInt(this.typedValue);
             this.portAlreadySet = true;
             this.typedValue = "";
-            if (this.server == null) {
-              this.server = new Server("Tree Server", this.port, true);
-              this.server.start();
+            if (this.treeServer == null) {
+              this.treeServer = new TreeServer(this.port, this.tree);
+              this.treeServer.start();
             }
-            this.state = State.ADDRESS;
+            this.state = State.STARTING_SERVER;
           }
         }
+        break;
+
+      case STARTING_SERVER:
+
+        this.drawText(STARTING_SERVER, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
+
+        if (this.treeServer.isReady()) {
+          this.state = State.ADDRESS;
+        }
+
         break;
       case ADDRESS:
 
@@ -346,7 +356,7 @@ public class Display extends GameEngine {
         }
     }
 
-
+    // Draw the text and text background
     if (this.state != State.SETUP) {
       this.draw(this.typedValueBackground);
       if (!this.typedValue.isEmpty()) {
@@ -358,6 +368,7 @@ public class Display extends GameEngine {
     // TODO: Check what the error was before abandoning the client
     if (this.client != null) {
       if (this.client.getException() != null) {
+        this.client.getException().printStackTrace();
         this.state = State.SETUP;
         this.client.stop();
         this.client = null;
@@ -368,10 +379,6 @@ public class Display extends GameEngine {
   }
 
   private void depthFirstSearch(Node start, int level, boolean youAreRightChild, int parentSpace, int px, int py) {
-
-    if (this.debug) {
-      this.debug = false;
-    }
 
     // Calculate our space
     int ourSpace = parentSpace * 2 + (youAreRightChild ? 1 : 0);
@@ -387,7 +394,7 @@ public class Display extends GameEngine {
     int x = ((leftSide + rightSide) / 2);
     int y = calculateY(level);
     if (start == this.tree.getRoot() && this.center) {
-      this.cameraXOffset = -x/2;
+      this.cameraXOffset = (float) -x/2;
       this.cameraYOffset = y;
       this.center = false;
     }
@@ -423,7 +430,7 @@ public class Display extends GameEngine {
 
   private void drawNode(Node node, int x, int y) {
     this.drawOval(x * scale + this.cameraXOffset, y * scale + this.cameraYOffset, radius*2 * scale, radius*2 * scale, Color.BLACK);
-    Font font = new Font("Node font", 0, (int) (12 * scale));
+    Font font = new Font("Node font", Font.PLAIN, (int) (12 * scale));
     this.drawText(node.getValue() + "", (int) ((x + radius) * scale + this.cameraXOffset), (int) ((y + radius) * scale + this.cameraYOffset), Color.BLACK, font);
   }
 
