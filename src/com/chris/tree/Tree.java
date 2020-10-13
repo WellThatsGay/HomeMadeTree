@@ -1,6 +1,8 @@
 package com.chris.tree;
 
-public class Tree {
+import java.io.Serializable;
+
+public class Tree implements Serializable {
 
   private Node root;
   private int levels;

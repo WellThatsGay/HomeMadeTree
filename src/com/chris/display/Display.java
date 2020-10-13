@@ -31,6 +31,7 @@ public class Display extends GameEngine {
   private static final String ENTER_ADDRESS = "Enter Address";
   private static final String STARTING_SERVER = "Starting Server";
   private static final String CONNECTING = "Connecting";
+  private static final String GET_TREE = "Downloading Tree";
   private static final int CONNECTING_TEXT_X = 10;
   private static final int CONNECTING_TEXT_Y = 30;
 
@@ -42,7 +43,7 @@ public class Display extends GameEngine {
   private static float speed = 150;
 
   public enum State {
-    SETUP, RUNNING, HOST, STARTING_SERVER, ADDRESS, PORT, JOIN, CONNECTING
+    SETUP, RUNNING, HOST, STARTING_SERVER, ADDRESS, PORT, JOIN, CONNECTING, GET_TREE
   }
 
   public enum Actions {
@@ -81,6 +82,8 @@ public class Display extends GameEngine {
 
   @Override
   protected boolean onUserStart() {
+
+    this.limitFps(60);
 
     tree = new Tree();
     tree.add(24);
@@ -141,7 +144,6 @@ public class Display extends GameEngine {
     }
 
     switch (this.state) {
-
       case RUNNING:
 
         if (this.client != null) {
@@ -273,7 +275,7 @@ public class Display extends GameEngine {
             this.portAlreadySet = true;
             this.typedValue = "";
             if (this.treeServer == null) {
-              this.treeServer = new TreeServer(this.port, this.tree);
+              this.treeServer = new TreeServer(this.port, new Tree(99));
               this.treeServer.start();
             }
             this.state = State.STARTING_SERVER;
@@ -349,11 +351,23 @@ public class Display extends GameEngine {
       case CONNECTING:
         this.drawText(CONNECTING, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
         if (client.isReady()) {
-          this.state = State.RUNNING;
+          this.state = State.GET_TREE;
         }
         if (this.client.getException() != null) {
           this.state = State.SETUP;
         }
+        break;
+      case GET_TREE:
+        this.drawText(GET_TREE, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
+        if (this.client.isDataAvailable()) {
+          Message m = this.client.getReceivedData();
+          if (m.getId() == Actions.TREE) {
+            this.tree = (Tree) m.getPayload();
+            this.state = State.RUNNING;
+            System.out.println("Got the tree");
+          }
+        }
+        break;
     }
 
     // Draw the text and text background
