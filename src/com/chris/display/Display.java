@@ -147,7 +147,7 @@ public class Display extends GameEngine {
       case RUNNING:
 
         if (this.client != null) {
-          while (this.client.isDataAvailable()) {
+          while (this.client.hasDataAvailable()) {
             Message received = this.client.getReceivedData();
             if (received.getId() == Actions.TREE) {
               this.tree = (Tree) received.getPayload();
@@ -359,7 +359,7 @@ public class Display extends GameEngine {
         break;
       case GET_TREE:
         this.drawText(GET_TREE, CONNECTING_TEXT_X, CONNECTING_TEXT_Y, Color.BLACK);
-        if (this.client.isDataAvailable()) {
+        if (this.client.hasDataAvailable()) {
           Message m = this.client.getReceivedData();
           if (m.getId() == Actions.TREE) {
             this.tree = (Tree) m.getPayload();
